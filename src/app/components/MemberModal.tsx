@@ -101,7 +101,7 @@ const MemberModal: React.FC = () => {
 
   useEffect(() => {
     updateEndDate();
-  }, [formData.startDate, formData.membershipType]);
+  }, [formData.startDate, formData.membershipType ,updateEndDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

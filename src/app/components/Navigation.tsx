@@ -7,7 +7,8 @@ const Navigation: React.FC = () => {
   const { activeSection, setActiveSection } = useMemberContext();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navItems = [
+  // Type-safe navItems to match activeSection type
+  const navItems: { id: 'dashboard' | 'members'; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -35,10 +36,12 @@ const Navigation: React.FC = () => {
       </div>
 
       {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
         {/* Logo Section */}
         <div className="flex items-center justify-center h-16 px-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -53,7 +56,7 @@ const Navigation: React.FC = () => {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
-              
+
               return (
                 <button
                   key={item.id}
@@ -63,9 +66,10 @@ const Navigation: React.FC = () => {
                   }}
                   className={`
                     w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                    ${isActive 
-                      ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500 shadow-sm' 
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ${
+                      isActive
+                        ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                 >
@@ -91,7 +95,7 @@ const Navigation: React.FC = () => {
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />

@@ -28,6 +28,7 @@ interface MemberContextProps {
   setStatusFilter: (status: MembershipStatus | '') => void;
   typeFilter: MembershipType | '';
   setTypeFilter: (type: MembershipType | '') => void;
+  memberIdCounter: number;
 }
 
 const MemberContext = createContext<MemberContextProps | undefined>(undefined);

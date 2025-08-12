@@ -165,7 +165,7 @@ const MembersTable: React.FC = () => {
               {filteredMembers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                    No members found. Click "Add New Member" to get started.
+                    No members found. Click &quot;Add New Member&quot; to get started.
                   </td>
                 </tr>
               ) : (
