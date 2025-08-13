@@ -10,8 +10,13 @@ import {
   MembershipType,
   Member
 } from '@/types/member';
-import { parseISO, isAfter, isBefore } from 'date-fns';
 import { useMemberContext } from '@/context/MemberContext';
+
+// 1. Import our new utility function
+import { getMemberDisplayStatus } from '@/utils/statusUtils';
+
+// Define the possible status types for our helper
+type DisplayStatus = 'Active' | 'Expired' | 'Expiring Soon' | 'Suspended';
 
 const MembersTable: React.FC = () => {
   const { 
@@ -30,65 +35,32 @@ const MembersTable: React.FC = () => {
 
   const filteredMembers = useMemo(() => {
     return members.filter(member => {
-      // Search filter
       const matchesSearch = searchTerm === '' || 
         member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.memberId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Status filter
       const matchesStatus = statusFilter === '' || member.status === statusFilter;
-      
-      // Type filter
       const matchesType = typeFilter === '' || member.membershipType === typeFilter;
       
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [members, searchTerm, statusFilter, typeFilter]);
 
-  const getStatusBadge = (member: Member) => {
-    const now = new Date();
-    const endDate = parseISO(member.endDate);
-    const isExpired = isBefore(endDate, now);
-    const isExpiringSoon = isAfter(endDate, now) && isBefore(endDate, new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000));
-    
-    if (isExpired && member.status === 'active') {
-      return (
-        <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-          Expired
-        </span>
-      );
-    }
-    
-    if (isExpiringSoon && member.status === 'active') {
-      return (
-        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-          Expiring Soon
-        </span>
-      );
-    }
-    
-    switch (member.status) {
-      case 'active':
-        return (
-          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-            Active
-          </span>
-        );
-      case 'expired':
-        return (
-          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-            Expired
-          </span>
-        );
-      case 'suspended':
-        return (
-          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-            Suspended
-          </span>
-        );
+  // 2. The old getStatusBadge function is gone.
+  // We replace it with a simple helper that just returns CSS classes.
+  const getStatusClass = (status: DisplayStatus) => {
+    switch (status) {
+      case 'Active':
+        return 'bg-green-100 text-green-800';
+      case 'Expiring Soon':
+        return 'bg-orange-100 text-orange-800';
+      case 'Expired':
+        return 'bg-red-100 text-red-800';
+      case 'Suspended':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return null;
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -169,38 +141,48 @@ const MembersTable: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredMembers.map(member => (
-                  <tr key={member.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-800">{member.memberId}</td>
-                    <td className="px-6 py-4">{member.fullName}</td>
-                    <td className="px-6 py-4">{member.email}</td>
-                    <td className="px-6 py-4 capitalize">{member.membershipType}</td>
-                    <td className="px-6 py-4">{getStatusBadge(member)}</td>
-                    <td className="px-6 py-4">{new Date(member.endDate).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => {
-                            setCurrentEditingId(member.id);
-                            setShowMemberModal(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-800 transition-colors"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setMemberToDelete(member.id);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-red-600 hover:text-red-800 transition-colors"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filteredMembers.map(member => {
+                  // 3. For each member, we call our central function to get the status
+                  const displayStatus = getMemberDisplayStatus(member.status, member.endDate);
+                  
+                  return (
+                    <tr key={member.id} className="border-b border-gray-200 hover:bg-gray-50">
+                      <td className="px-6 py-4 font-medium text-gray-800">{member.memberId}</td>
+                      <td className="px-6 py-4">{member.fullName}</td>
+                      <td className="px-6 py-4">{member.email}</td>
+                      <td className="px-6 py-4 capitalize">{member.membershipType}</td>
+                      <td className="px-6 py-4">
+                        {/* 4. We use the result to display the badge and set its style */}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(displayStatus)}`}>
+                          {displayStatus}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">{new Date(member.endDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => {
+                              setCurrentEditingId(member.id);
+                              setShowMemberModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setMemberToDelete(member.id);
+                              setShowDeleteModal(true);
+                            }}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>

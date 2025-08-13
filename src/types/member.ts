@@ -1,5 +1,9 @@
-export type MembershipType = 'monthly' | 'quarterly' | 'annual';
-export type MembershipStatus = 'active' | 'expired' | 'suspended';
+// src/types/member.ts
+
+export type MembershipStatus = "active" | "suspended" | "expired";
+
+// Add 'custom' to the MembershipType union
+export type MembershipType = "monthly" | "quarterly" | "annual" | "custom";
 
 export interface Member {
   id: number;
