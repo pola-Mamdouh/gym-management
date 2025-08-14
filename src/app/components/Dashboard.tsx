@@ -174,25 +174,25 @@ const Dashboard: React.FC = () => {
         <div className="flex flex-wrap gap-4">
           <button
             onClick={() => setShowMemberModal(true)}
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center"
+            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center cursor-pointer"
           >
             <FaPlus className="mr-2" /> Add New Member
           </button>
           <button
             onClick={() => setActiveSection("members")}
-            className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors flex items-center"
+            className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors flex items-center cursor-pointer"
           >
             <FaList className="mr-2" /> View All Members
           </button>
           <button
             onClick={handleExport}
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center"
+            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center cursor-pointer"
           >
             <FaDownload className="mr-2" /> Export Data
           </button>
           <button
             onClick={handleExportPDF}
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center"
+            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center cursor-pointer"
           >
             <FaDownload className="mr-2" /> Export Data PDF
           </button>

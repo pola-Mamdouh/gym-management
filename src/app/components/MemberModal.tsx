@@ -174,7 +174,7 @@ const MemberModal: React.FC = () => {
             </h3>
             <button
               onClick={() => setShowMemberModal(false)}
-              className="text-gray-500 hover:text-gray-700 text-2xl"
+              className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer"
             >
               <FaTimes />
             </button>
@@ -322,13 +322,13 @@ const MemberModal: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowMemberModal(false)}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-gym-accent text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center"
+              className="bg-gym-accent text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center cursor-pointer"
             >
               <FaSave className="mr-2" /> Save Member
             </button>

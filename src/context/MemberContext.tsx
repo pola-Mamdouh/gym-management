@@ -48,29 +48,6 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [typeFilter, setTypeFilter] = useState<MembershipType | ''>('');
   const [memberIdCounter, setMemberIdCounter] = useState(1000);
 
-  // Initialize from localStorage
-  useEffect(() => {
-    const storedMembers = localStorage.getItem('gymMembers');
-    const storedCounter = localStorage.getItem('memberIdCounter');
-    const storedActivities = localStorage.getItem('recentActivities');
-
-    if (storedMembers) setMembers(JSON.parse(storedMembers));
-    if (storedCounter) setMemberIdCounter(parseInt(storedCounter));
-    if (storedActivities) setRecentActivities(JSON.parse(storedActivities));
-  }, []);
-
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('gymMembers', JSON.stringify(members));
-  }, [members]);
-
-  useEffect(() => {
-    localStorage.setItem('memberIdCounter', memberIdCounter.toString());
-  }, [memberIdCounter]);
-
-  useEffect(() => {
-    localStorage.setItem('recentActivities', JSON.stringify(recentActivities));
-  }, [recentActivities]);
 
   const addMember = (member: Member) => {
     setMembers([...members, member]);
