@@ -1,20 +1,23 @@
-'use client'
-import { FaCheckCircle } from 'react-icons/fa';
-import { useMemberContext } from '@/context/MemberContext';
+"use client";
 
-const Toast: React.FC = () => {
-  const { showToast, toastMessage } = useMemberContext();
+import React from "react";
+import { useMemberContext } from "@/context/MemberContext";
 
-  if (!showToast) return null;
+export default function Toasts() {
+  const { toasts } = useMemberContext();
 
   return (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn">
-      <div className="flex items-center">
-        <FaCheckCircle className="mr-2" />
-        <span>{toastMessage}</span>
-      </div>
+    <div className="fixed top-4 right-4 z-50 space-y-2">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={`px-4 py-2 rounded shadow max-w-xs text-sm ${
+            t.type === "success" ? "bg-green-50 text-green-800" : t.type === "error" ? "bg-red-50 text-red-800" : "bg-gray-50 text-gray-800"
+          }`}
+        >
+          {t.message}
+        </div>
+      ))}
     </div>
   );
-};
-
-export default Toast;
+}

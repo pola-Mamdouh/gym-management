@@ -1,32 +1,27 @@
 // src/types/member.ts
-
-export type MembershipStatus = "active" | "suspended" | "expired";
-
-// Add 'custom' to the MembershipType union
-export type MembershipType = "monthly" | "quarterly" | "annual" | "custom";
-
-export interface Member {
+export type Member = {
   id: number;
   fullName: string;
   memberId: string;
-  email: string;
-  phone?: string;
-  membershipType: MembershipType;
-  status: MembershipStatus;
+  email?: string | null;
+  phone?: string | null;
+  membershipType: "monthly" | "quarterly" | "annual";
+  status: "active" | "expired" | "suspended";
   startDate: string;
-  endDate: string;
-  notes?: string;
+  endDate?: string | null;
+  notes?: string | null;
   createdAt: string;
-}
+  updatedAt: string;
+};
 
-export interface MemberFormData {
+export type MemberFormData = {
   fullName: string;
   memberId: string;
-  email: string;
+  email?: string;
   phone?: string;
-  membershipType: MembershipType;
-  status: MembershipStatus;
-  startDate: string;
-  endDate: string;
+  membershipType: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
   notes?: string;
-}
+};

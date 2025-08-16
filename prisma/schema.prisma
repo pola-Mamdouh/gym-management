@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipType {
+  monthly
+  quarterly
+  annual
+}
+
+enum MembershipStatus {
+  active
+  expired
+  suspended
+}
+
+model Member {
+  id             Int              @id @default(autoincrement())
+  fullName       String           @db.VarChar(50)
+  memberId       String           @unique @db.VarChar(10)
+  email          String?          @unique @db.VarChar(100)
+  phone          String?          @unique @db.VarChar(15)
+  membershipType MembershipType
+  status         MembershipStatus @default(active)
+  startDate      DateTime         @default(now())
+  endDate        DateTime?
+  notes          String?          @db.VarChar(200)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}

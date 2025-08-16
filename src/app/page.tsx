@@ -1,26 +1,17 @@
-'use client'
-import Dashboard from './components/Dashboard';
-import MemberModal from './components/MemberModal';
-import DeleteModal from './components/DeleteModal';
-import MembersTable from './components/MembersTable';
-import { useMemberContext } from '@/context/MemberContext';
+import React from "react";
+import MembersTable from "./components/MembersTable";
+import { MemberProvider } from "@/context/MemberContext";
+import Toasts from "./components/Toast";
 
-export default function Home() {
-  const { 
-    activeSection, 
-    showMemberModal, 
-    setShowMemberModal,
-    showDeleteModal,
-    setShowDeleteModal
-  } = useMemberContext();
-
+export default function Page() {
   return (
-    <div className="min-h-screen">
-      {activeSection === 'dashboard' && <Dashboard />}
-      {activeSection === 'members' && <MembersTable />}
-      
-      {showMemberModal && <MemberModal />}
-      {showDeleteModal && <DeleteModal />}
-    </div>
+    <MemberProvider>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <MembersTable />
+        </div>
+      </div>
+      <Toasts />
+    </MemberProvider>
   );
 }

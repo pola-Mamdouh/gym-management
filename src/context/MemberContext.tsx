@@ -1,126 +1,108 @@
-'use client'
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Member, MemberFormData, MembershipStatus, MembershipType } from '@/types/member';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-interface MemberContextProps {
+import React, { createContext, useContext, useEffect, useState } from "react";
+import type { Member, MemberFormData } from "@/types/member";
+import {
+  fetchMembersClient,
+  addMemberClient,
+  updateMemberClient,
+  deleteMemberClient,
+} from "@/lib/client/api";
+
+type ToastItem = { id: string; message: string; type?: "success" | "error" | "info" };
+
+type MemberContextType = {
   members: Member[];
-  addMember: (member: Member) => void;
-  updateMember: (id: number, member: MemberFormData) => void;
-  deleteMember: (id: number) => void;
-  currentEditingId: number | null;
-  setCurrentEditingId: (id: number | null) => void;
-  showMemberModal: boolean;
-  setShowMemberModal: (show: boolean) => void;
-  showDeleteModal: boolean;
-  setShowDeleteModal: (show: boolean) => void;
-  memberToDelete: number | null;
-  setMemberToDelete: (id: number | null) => void;
-  showToast: boolean;
-  toastMessage: string;
-  showToastMessage: (message: string) => void;
-  activeSection: 'dashboard' | 'members';
-  setActiveSection: (section: 'dashboard' | 'members') => void;
-  addRecentActivity: (action: 'added' | 'updated' | 'deleted', memberName: string) => void;
-  recentActivities: { action: string; memberName: string; timestamp: string }[];
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  statusFilter: MembershipStatus | '';
-  setStatusFilter: (status: MembershipStatus | '') => void;
-  typeFilter: MembershipType | '';
-  setTypeFilter: (type: MembershipType | '') => void;
-  memberIdCounter: number;
-}
+  loading: boolean;
+  fetchMembers: () => Promise<void>;
+  addMember: (data: MemberFormData) => Promise<Member | void>;
+  updateMember: (id: number, data: Partial<MemberFormData>) => Promise<Member | void>;
+  deleteMember: (id: number) => Promise<void>;
+  toasts: ToastItem[];
+  pushToast: (t: Omit<ToastItem, "id">) => void;
+};
 
-const MemberContext = createContext<MemberContextProps | undefined>(undefined);
+const MemberContext = createContext<MemberContextType | undefined>(undefined);
 
-export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MemberProvider = ({ children }: { children: React.ReactNode }) => {
   const [members, setMembers] = useState<Member[]>([]);
-  const [currentEditingId, setCurrentEditingId] = useState<number | null>(null);
-  const [showMemberModal, setShowMemberModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [memberToDelete, setMemberToDelete] = useState<number | null>(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'members'>('dashboard');
-  const [recentActivities, setRecentActivities] = useState<{ action: string; memberName: string; timestamp: string }[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<MembershipStatus | ''>('');
-  const [typeFilter, setTypeFilter] = useState<MembershipType | ''>('');
-  const [memberIdCounter, setMemberIdCounter] = useState(1000);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  async function fetchMembers() {
+    setLoading(true);
+    try {
+      const res = await fetchMembersClient();
+      setMembers(res);
+    } catch (e) {
+      pushToast({ message: "Failed to load members", type: "error" });
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const addMember = (member: Member) => {
-    setMembers([...members, member]);
-    setMemberIdCounter(prev => prev + 1);
-  };
+  useEffect(() => {
+    fetchMembers();
+  }, []);
 
-  const updateMember = (id: number, formData: MemberFormData) => {
-    setMembers(members.map(m => 
-      m.id === id ? { ...m, ...formData } : m
-    ));
-  };
+  function pushToast(item: Omit<ToastItem, "id">) {
+    const id = String(Date.now()) + Math.random().toString(36).slice(2, 7);
+    setToasts((s) => [...s, { id, ...item }]);
+    // auto remove after 4s
+    setTimeout(() => {
+      setToasts((s) => s.filter((t) => t.id !== id));
+    }, 4000);
+  }
 
-  const deleteMember = (id: number) => {
-    setMembers(members.filter(m => m.id !== id));
-  };
+  async function addMember(data: MemberFormData) {
+    try {
+      const created = await addMemberClient(data);
+      setMembers((prev) => [created, ...prev]);
+      pushToast({ message: "Member added", type: "success" });
+      return created;
+    } catch (e: any) {
+      pushToast({ message: e?.message ?? "Failed to add member", type: "error" });
+      throw e;
+    }
+  }
 
-  const showToastMessage = (message: string) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+  async function updateMember(id: number, data: Partial<MemberFormData>) {
+    try {
+      const updated = await updateMemberClient(id, data);
+      setMembers((prev) => prev.map((m) => (m.id === id ? updated : m)));
+      pushToast({ message: "Member updated", type: "success" });
+      return updated;
+    } catch (e: any) {
+      pushToast({ message: e?.message ?? "Failed to update member", type: "error" });
+      throw e;
+    }
+  }
 
-  const addRecentActivity = (action: 'added' | 'updated' | 'deleted', memberName: string) => {
-    const newActivity = {
-      action,
-      memberName,
-      timestamp: new Date().toLocaleString()
-    };
-    
-    const updatedActivities = [newActivity, ...recentActivities].slice(0, 5);
-    setRecentActivities(updatedActivities);
-  };
-
-  const contextValue = {
-    members,
-    addMember,
-    updateMember,
-    deleteMember,
-    currentEditingId,
-    setCurrentEditingId,
-    showMemberModal,
-    setShowMemberModal,
-    showDeleteModal,
-    setShowDeleteModal,
-    memberToDelete,
-    setMemberToDelete,
-    showToast,
-    toastMessage,
-    showToastMessage,
-    activeSection,
-    setActiveSection,
-    addRecentActivity,
-    recentActivities,
-    searchTerm,
-    setSearchTerm,
-    statusFilter,
-    setStatusFilter,
-    typeFilter,
-    setTypeFilter,
-    memberIdCounter
-  };
+  async function deleteMember(id: number) {
+    try {
+      await deleteMemberClient(id);
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+      pushToast({ message: "Member deleted", type: "success" });
+    } catch (e: any) {
+      pushToast({ message: e?.message ?? "Failed to delete member", type: "error" });
+      throw e;
+    }
+  }
 
   return (
-    <MemberContext.Provider value={contextValue}>
+    <MemberContext.Provider
+      value={{ members, loading, fetchMembers, addMember, updateMember, deleteMember, toasts, pushToast }}
+    >
       {children}
     </MemberContext.Provider>
   );
 };
 
-export const useMemberContext = () => {
-  const context = useContext(MemberContext);
-  if (!context) {
-    throw new Error('useMemberContext must be used within a MemberProvider');
-  }
-  return context;
-};
+export function useMemberContext() {
+  const ctx = useContext(MemberContext);
+  if (!ctx) throw new Error("useMemberContext must be used inside MemberProvider");
+  return ctx;
+}
